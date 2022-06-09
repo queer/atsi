@@ -1,0 +1,19 @@
+[tasks.build]
+command = "cargo"
+args = ["build"]
+dependencies = ["format"]
+
+[tasks.build-release]
+command = "cargo"
+args = ["build", "--release"]
+dependencies = ["format"]
+
+[tasks.debug]
+command = "cp"
+args = ["target/debug/atsi", "target/debug/@"]
+dependencies = ["build"]
+
+[tasks.release]
+command = "cp"
+args = ["target/release/atsi", "target/release/@"]
+dependencies = ["build-release"]
