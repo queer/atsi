@@ -12,7 +12,7 @@ use tokio::time::Instant;
 #[tokio::main]
 async fn main() -> SyncResult<()> {
     let start = Instant::now();
-    std::env::set_var("RUST_LOG", "debug");
+    std::env::set_var("RUST_LOG", "info");
     pretty_env_logger::init();
 
     engine::alpine::download_rootfs(engine::alpine::VERSION).await?;
@@ -29,8 +29,9 @@ async fn main() -> SyncResult<()> {
     let matches = Command::new("@")
         .subcommand(
             Command::new("run")
+                .visible_alias("r")
                 .arg(Arg::new("command").takes_value(true).required(true))
-                .arg(Arg::new("detach").short('d').required(false))
+                // .arg(Arg::new("detach").short('d').required(false))
                 .arg(
                     Arg::new("immutable")
                         .short('i')
@@ -70,7 +71,7 @@ async fn main() -> SyncResult<()> {
         Some("run") => {
             let matches = matches.subcommand_matches("run").unwrap();
             let command = matches.value_of("command").unwrap();
-            let detach: bool = matches.is_present("detach");
+            let detach: bool = false; // matches.is_present("detach");
             let packages: Vec<String> = matches
                 .values_of("package")
                 .map_or(vec![], |v| v.map(|f| f.to_string()).collect());
