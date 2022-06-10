@@ -158,15 +158,11 @@ impl<'a> ContainerEngine<'a> {
         let container_root = &self.fs.container_root(self.name);
         let rootfs_lower = &append_all(container_root, vec!["rootfs_lower"]);
         let rootfs = &append_all(container_root, vec!["rootfs"]);
-        let upper = &append_all(container_root, vec!["upper"]);
-        let workdir = &append_all(container_root, vec!["workdir"]);
 
         // Set up root directory and bind-mount immutable alpine fs
         debug!("Setting up root directory...");
         self.fs.touch_dir(rootfs_lower)?;
         self.fs.touch_dir(rootfs)?;
-        self.fs.touch_dir(upper)?;
-        self.fs.touch_dir(workdir)?;
         super::alpine::extract_rootfs_to_path(&self.opts.alpine_version, rootfs_lower)?;
         self.fs.bind_mount_rw(rootfs_lower, rootfs)?;
 
