@@ -72,7 +72,7 @@ impl FsDriver {
     }
 
     pub fn touch(&self, path: &Path) -> Result<()> {
-        debug!("touching: {}",  path.display());
+        debug!("touching: {}", path.display());
         match OpenOptions::new().create(true).write(true).open(path) {
             Ok(_) => Ok(()),
             Err(e) => Err(Box::new(e)),
@@ -80,7 +80,7 @@ impl FsDriver {
     }
 
     pub fn touch_dir(&self, path: &Path) -> Result<()> {
-        debug!("touching dir: {}",  path.display());
+        debug!("touching dir: {}", path.display());
         match fs::create_dir_all(path) {
             Ok(_) => Ok(()),
             Err(e) => Err(Box::new(e)),
@@ -88,7 +88,7 @@ impl FsDriver {
     }
 
     pub fn touch_dir_sync(&self, path: &Path) -> SyncResult<()> {
-        debug!("touching dir: {}",  path.display());
+        debug!("touching dir: {}", path.display());
         match fs::create_dir_all(path) {
             Ok(_) => Ok(()),
             Err(e) => Err(Box::new(e)),

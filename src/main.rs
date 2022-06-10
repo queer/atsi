@@ -120,7 +120,9 @@ async fn main() -> SyncResult<()> {
                 })
                 .collect()
             });
-            let alpine_version = matches.value_of("alpine").unwrap_or(engine::alpine::VERSION);
+            let alpine_version = matches
+                .value_of("alpine")
+                .unwrap_or(engine::alpine::VERSION);
 
             engine::slirp::download_slirp4netns().await?;
             debug!(

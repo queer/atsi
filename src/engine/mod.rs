@@ -34,10 +34,7 @@ impl Engine {
         }
     }
 
-    pub async fn run(
-        &self,
-        opts: RunOpts,
-    ) -> SyncResult<()> {
+    pub async fn run(&self, opts: RunOpts) -> SyncResult<()> {
         container::ContainerEngine::new(&self.name, opts)
             .run(self.start)
             .await?;
