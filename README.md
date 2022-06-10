@@ -27,5 +27,5 @@ Docker is a lot of effort, and frankly is overkill for this. Instead, @ creates
 its own minimal containers, hooks up some basic networking, and extracts a
 fresh Alpine rootfs.
 
-[The process of setting up a container](https://github.com/queer/atsi/blob/105b2d44981a52318ac55941d64de14d36a80d31/src/engine/container.rs#L158-L232)
+[The process of setting up a container](https://github.com/queer/atsi/blob/51918281a42894690ec49fa6500b0d258ef02d93/src/engine/container.rs#L158-L228)
 should be fairly legible.
