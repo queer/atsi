@@ -7,6 +7,8 @@ Alpine containers. Think of it a little like
 [`nix-shell`](https://nixos.org/manual/nix/stable/command-ref/nix-shell.html)
 for Alpine.
 
+[![asciicast](https://asciinema.org/a/500880.svg)](https://asciinema.org/a/500880)
+
 ## Getting started
 
 Static binaries are automatically released [here](https://github.com/queer/atsi/releases).
