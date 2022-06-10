@@ -134,7 +134,7 @@ async fn main() -> SyncResult<()> {
                 .unwrap_or(engine::alpine::VERSION);
             let env_vars: HashMap<String, String> = matches.values_of("env").map_or(HashMap::new(), |v| {
                 v.map(|e| {
-                    if let Some((key, value)) = e.split_once("=") {
+                    if let Some((key, value)) = e.split_once('=') {
                         (key.to_string(), value.to_string())
                     } else {
                         error!("Invalid environment variable: {}", e);
