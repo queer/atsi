@@ -248,7 +248,7 @@ impl<'a> ContainerEngine<'a> {
             let source = Path::new(&source);
             let target_path = format!("{}/{}", rootfs.display(), target);
             let target = Path::new(&target_path);
-            debug!("mounting rw: {} -> {}", source.display(), target.display());
+            debug!("mounting {:?}: {} -> {}", mode, source.display(), target.display());
             if source.metadata()?.is_dir() {
                 self.fs.touch_dir(Path::new(&target))?;
                 match &mode {
@@ -281,6 +281,7 @@ impl<'a> ContainerEngine<'a> {
     }
 }
 
+#[derive(Debug)]
 enum AutoMountMode {
     Rw,
     Ro,
