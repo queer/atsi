@@ -7,6 +7,7 @@ use tokio::time::Instant;
 
 use crate::util::SyncResult;
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
@@ -19,6 +20,7 @@ pub struct RunOpts {
     pub rw_mounts: Vec<(String, String)>,
     pub ro_mounts: Vec<(String, String)>,
     pub alpine_version: String,
+    pub env_vars: HashMap<String, String>,
 }
 
 pub struct Engine {

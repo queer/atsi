@@ -230,6 +230,7 @@ impl<'a> ContainerEngine<'a> {
         // This will never return if the container successfully starts
         let error = Command::new("sh")
             .env_clear()
+            .envs(&self.opts.env_vars)
             .arg("-c")
             .arg(&self.opts.command)
             .exec();

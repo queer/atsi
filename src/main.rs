@@ -4,6 +4,8 @@ extern crate log;
 mod engine;
 mod util;
 
+use std::collections::HashMap;
+
 use crate::util::SyncResult;
 
 use clap::{Arg, Command};
@@ -82,6 +84,13 @@ async fn main() -> SyncResult<()> {
                         .default_value(engine::alpine::VERSION)
                         .help(format!("The version of Alpine Linux to use. Default is {}", engine::alpine::VERSION).as_str())
                 )
+                .arg(
+                    Arg::new("env")
+                        .long("env")
+                        .short('e')
+                        .takes_value(true)
+                        .help("Set an environment variable. Format is `VARIABLE=value`.")
+                )
                 ,
         )
         .subcommand(Command::new("ps"))
@@ -123,6 +132,16 @@ async fn main() -> SyncResult<()> {
             let alpine_version = matches
                 .value_of("alpine")
                 .unwrap_or(engine::alpine::VERSION);
+            let env_vars: HashMap<String, String> = matches.values_of("env").map_or(HashMap::new(), |v| {
+                v.map(|e| {
+                    if let Some((key, value)) = e.split_once("=") {
+                        (key.to_string(), value.to_string())
+                    } else {
+                        error!("Invalid environment variable: {}", e);
+                        panic!();
+                    }
+                }).collect()
+            });
 
             engine::slirp::download_slirp4netns().await?;
             debug!(
@@ -145,6 +164,7 @@ async fn main() -> SyncResult<()> {
                     rw_mounts,
                     ro_mounts,
                     alpine_version: alpine_version.to_string(),
+                    env_vars,
                 })
                 .await?;
         }
