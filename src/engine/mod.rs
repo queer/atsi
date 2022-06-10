@@ -5,7 +5,7 @@ pub mod slirp;
 
 use tokio::time::Instant;
 
-use crate::util::SyncResult;
+use crate::util::{cache_dir, SyncResult};
 
 use std::collections::HashMap;
 use std::fs;
@@ -38,6 +38,12 @@ impl Engine {
             start,
             fs: FsDriver::new(),
         }
+    }
+
+    pub async fn init(&self) -> SyncResult<()> {
+        tokio::fs::create_dir_all(&self.fs.all_containers_root()).await?;
+        tokio::fs::create_dir_all(&cache_dir()).await?;
+        Ok(())
     }
 
     pub async fn run(&self, opts: RunOpts) -> SyncResult<()> {

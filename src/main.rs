@@ -14,8 +14,10 @@ use tokio::time::Instant;
 #[tokio::main]
 async fn main() -> SyncResult<()> {
     let start = Instant::now();
-    std::env::set_var("RUST_LOG", "info");
+    std::env::set_var("RUST_LOG", "debug");
     pretty_env_logger::init();
+    let engine = engine::Engine::new(start);
+    engine.init().await?;
 
     let matches = Command::new("@")
         .subcommand(
@@ -154,7 +156,6 @@ async fn main() -> SyncResult<()> {
                 });
             let name = matches.value_of("name").unwrap();
 
-            let engine = engine::Engine::new(start);
             if engine.container_exists(name) {
                 error!("@ container already exists: {}", name);
                 return Ok(());
