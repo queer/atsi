@@ -14,7 +14,11 @@ use tokio::time::Instant;
 #[tokio::main]
 async fn main() -> SyncResult<()> {
     let start = Instant::now();
-    std::env::set_var("RUST_LOG", "debug");
+    let log_level = match std::env::var("RUST_LOG") {
+        Ok(value) => value,
+        Err(_) => "info".to_string(),
+    };
+    std::env::set_var("RUST_LOG", log_level);
     pretty_env_logger::init();
     let engine = engine::Engine::new(start);
     engine.init().await?;
