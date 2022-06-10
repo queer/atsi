@@ -58,7 +58,8 @@ impl Engine {
         let mut live_containers = vec![];
         for container in fs::read_dir(self.fs.all_containers_root())? {
             let state = fs::read_to_string(
-                self.fs.persistence_file(&container?.file_name().to_string_lossy().to_string()),
+                self.fs
+                    .persistence_file(&container?.file_name().to_string_lossy().to_string()),
             )?;
             let state: container::PersistentState = serde_json::from_str(&state)?;
             // Check if pid is still alive

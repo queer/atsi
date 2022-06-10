@@ -37,7 +37,8 @@ impl ContainerEngine {
 
     pub async fn run(&mut self, start: Instant) -> SyncResult<()> {
         // Basic setup
-        self.fs.touch_dir_sync(&self.fs.container_root(&self.opts.name))?;
+        self.fs
+            .touch_dir_sync(&self.fs.container_root(&self.opts.name))?;
 
         // clone(2)
         let stack_size = match Resource::STACK.get() {
@@ -77,7 +78,8 @@ impl ContainerEngine {
         }
 
         // slirp4netns
-        let mut slirp = super::slirp::spawn_for_container(&self.opts.name, pid.as_raw() as u32).await?;
+        let mut slirp =
+            super::slirp::spawn_for_container(&self.opts.name, pid.as_raw() as u32).await?;
         self.persist(slirp.id().unwrap())?;
         let ports = self.opts.ports.clone();
         let name = self.opts.name.clone();
@@ -249,7 +251,12 @@ impl ContainerEngine {
             let source = Path::new(&source);
             let target_path = format!("{}/{}", rootfs.display(), target);
             let target = Path::new(&target_path);
-            debug!("mounting {:?}: {} -> {}", mode, source.display(), target.display());
+            debug!(
+                "mounting {:?}: {} -> {}",
+                mode,
+                source.display(),
+                target.display()
+            );
             if source.metadata()?.is_dir() {
                 self.fs.touch_dir(Path::new(&target))?;
                 match &mode {

@@ -157,7 +157,7 @@ async fn main() -> SyncResult<()> {
             let engine = engine::Engine::new(start);
             if engine.container_exists(name) {
                 error!("@ container already exists: {}", name);
-                return Ok(())
+                return Ok(());
             }
 
             engine::slirp::download_slirp4netns().await?;
