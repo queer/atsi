@@ -64,20 +64,20 @@ Serving HTTP on 0.0.0.0 port 8081 (http://0.0.0.0:8081/) ...
   <summary>Terminal 2</summary>
   <pre><code>
 git:(mistress) | ▶  curl localhost:8080
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Directory listing for /</title>
-</head>
-<body>
-<h1>Directory listing for /</h1>
-<hr>
-<ul>
-</ul>
-<hr>
-</body>
-</html>
+&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+&lt;html>
+&lt;head>
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+&lt;title>Directory listing for /</title>
+&lt;/head>
+&lt;body>
+&lt;h1>Directory listing for /</h1>
+&lt;hr>
+&lt;ul>
+&lt;/ul>
+&lt;hr>
+&lt;/body>
+&lt;/html>
 git:(mistress) | ▶  
   </code></pre>
 </details>
