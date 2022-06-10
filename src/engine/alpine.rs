@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 use yaml_rust::{Yaml, YamlLoader};
 
-pub const VERSION: &str = "3.14";
+pub const VERSION: &str = "3.16";
 pub const ARCH: &str = "x86_64";
 
 fn rootfs_base_directory() -> PathBuf {
