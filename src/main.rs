@@ -91,6 +91,14 @@ async fn main() -> SyncResult<()> {
                         .takes_value(true)
                         .help("Set an environment variable. Format is `VARIABLE=value`.")
                 )
+                .arg(
+                    Arg::new("name")
+                        .long("name")
+                        .short('n')
+                        .takes_value(true)
+                        .default_value(&haikunator::Haikunator::default().haikunate())
+                        .help("The name of the container. A random name will be generated if none is provided.")
+                )
                 ,
         )
         .subcommand(Command::new("ps").arg(Arg::new("json").long("json").help("Output as JSON")))
@@ -132,16 +140,25 @@ async fn main() -> SyncResult<()> {
             let alpine_version = matches
                 .value_of("alpine")
                 .unwrap_or(engine::alpine::VERSION);
-            let env_vars: HashMap<String, String> = matches.values_of("env").map_or(HashMap::new(), |v| {
-                v.map(|e| {
-                    if let Some((key, value)) = e.split_once('=') {
-                        (key.to_string(), value.to_string())
-                    } else {
-                        error!("Invalid environment variable: {}", e);
-                        panic!();
-                    }
-                }).collect()
-            });
+            let env_vars: HashMap<String, String> =
+                matches.values_of("env").map_or(HashMap::new(), |v| {
+                    v.map(|e| {
+                        if let Some((key, value)) = e.split_once('=') {
+                            (key.to_string(), value.to_string())
+                        } else {
+                            error!("Invalid environment variable: {}", e);
+                            panic!();
+                        }
+                    })
+                    .collect()
+                });
+            let name = matches.value_of("name").unwrap();
+
+            let engine = engine::Engine::new(start);
+            if engine.container_exists(name) {
+                error!("@ container already exists: {}", name);
+                return Ok(())
+            }
 
             engine::slirp::download_slirp4netns().await?;
             debug!(
@@ -154,9 +171,10 @@ async fn main() -> SyncResult<()> {
                 engine::alpine::rootfs_path(alpine_version).display()
             );
 
-            engine::Engine::new(start)
+            engine
                 .run(engine::RunOpts {
                     command: command.to_string(),
+                    name: name.to_string(),
                     packages,
                     detach,
                     ports,

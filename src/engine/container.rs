@@ -12,8 +12,7 @@ use nix::sys::wait::{waitpid, WaitStatus};
 use rlimit::Resource;
 use tokio::time::Instant;
 
-pub struct ContainerEngine<'a> {
-    name: &'a str,
+pub struct ContainerEngine {
     fs: FsDriver,
     opts: super::RunOpts,
 }
@@ -28,10 +27,9 @@ pub struct PersistentState {
     opts: super::RunOpts,
 }
 
-impl<'a> ContainerEngine<'a> {
-    pub fn new(name: &'a str, opts: super::RunOpts) -> Self {
+impl ContainerEngine {
+    pub fn new(opts: super::RunOpts) -> Self {
         Self {
-            name,
             fs: FsDriver::new(),
             opts,
         }
@@ -39,7 +37,7 @@ impl<'a> ContainerEngine<'a> {
 
     pub async fn run(&mut self, start: Instant) -> SyncResult<()> {
         // Basic setup
-        self.fs.touch_dir_sync(&self.fs.container_root(self.name))?;
+        self.fs.touch_dir_sync(&self.fs.container_root(&self.opts.name))?;
 
         // clone(2)
         let stack_size = match Resource::STACK.get() {
@@ -79,10 +77,10 @@ impl<'a> ContainerEngine<'a> {
         }
 
         // slirp4netns
-        let mut slirp = super::slirp::spawn_for_container(self.name, pid.as_raw() as u32).await?;
+        let mut slirp = super::slirp::spawn_for_container(&self.opts.name, pid.as_raw() as u32).await?;
         self.persist(slirp.id().unwrap())?;
         let ports = self.opts.ports.clone();
-        let name = self.name.to_string();
+        let name = self.opts.name.clone();
         let slirp_id = slirp.id().unwrap();
         tokio::spawn(async move {
             for (outer, inner) in ports {
@@ -93,7 +91,7 @@ impl<'a> ContainerEngine<'a> {
             slirp.wait().await.unwrap();
         });
 
-        let name = self.name.to_string();
+        let name = self.opts.name.clone();
         #[allow(unused_must_use)]
         ctrlc::set_handler(move || {
             debug!("Cleaning up after ^C");
@@ -126,7 +124,7 @@ impl<'a> ContainerEngine<'a> {
         }
 
         debug!("Cleaning up!");
-        self.fs.cleanup_root(self.name)?;
+        self.fs.cleanup_root(&self.opts.name)?;
         nix::sys::signal::kill(
             nix::unistd::Pid::from_raw(slirp_id as i32),
             nix::sys::signal::SIGTERM,
@@ -138,18 +136,18 @@ impl<'a> ContainerEngine<'a> {
     fn persist(&self, slirp_pid: u32) -> SyncResult<()> {
         debug!(
             "Persist state -> {}",
-            self.fs.persistence_file(self.name).display()
+            self.fs.persistence_file(&self.opts.name).display()
         );
         let state = PersistentState {
-            name: self.name.to_string(),
-            command: self.opts.command.to_string(),
+            name: self.opts.name.clone(),
+            command: self.opts.command.clone(),
             detach: self.opts.detach,
             pid: std::process::id(),
             slirp_pid,
             opts: self.opts.clone(),
         };
         let ser = serde_json::to_string(&state)?;
-        let mut file = File::create(self.fs.persistence_file(self.name))?;
+        let mut file = File::create(self.fs.persistence_file(&self.opts.name))?;
         file.write_all(ser.as_bytes())?;
         Ok(())
     }
@@ -157,7 +155,7 @@ impl<'a> ContainerEngine<'a> {
     fn run_in_container(&mut self, start: Instant) -> Result<()> {
         use nix::unistd::{chdir, chroot};
 
-        let container_root = &self.fs.container_root(self.name);
+        let container_root = &self.fs.container_root(&self.opts.name);
         let rootfs_lower = &append_all(container_root, vec!["rootfs_lower"]);
         let rootfs = &append_all(container_root, vec!["rootfs"]);
 

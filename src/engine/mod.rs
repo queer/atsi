@@ -11,9 +11,12 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
+use self::fs_driver::FsDriver;
+
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct RunOpts {
     pub command: String,
+    pub name: String,
     pub packages: Vec<String>,
     pub detach: bool,
     pub ports: Vec<(u16, u16)>,
@@ -25,34 +28,37 @@ pub struct RunOpts {
 }
 
 pub struct Engine {
-    name: String,
     start: Instant,
+    fs: FsDriver,
 }
 
 impl Engine {
     pub fn new(start: Instant) -> Self {
         Self {
-            name: haikunator::Haikunator::default().haikunate(),
             start,
+            fs: FsDriver::new(),
         }
     }
 
     pub async fn run(&self, opts: RunOpts) -> SyncResult<()> {
-        container::ContainerEngine::new(&self.name, opts)
+        container::ContainerEngine::new(opts)
             .run(self.start)
             .await?;
         Ok(())
     }
 
+    pub fn container_exists(&self, name: &str) -> bool {
+        self.fs.container_root(name).exists()
+    }
+
     pub async fn ps(&self, json: bool) -> SyncResult<()> {
         use prettytable::{cell, row, Table};
 
-        let driver = fs_driver::FsDriver::new();
         let mut dead_containers = vec![];
         let mut live_containers = vec![];
-        for container in fs::read_dir(driver.all_containers_root())? {
+        for container in fs::read_dir(self.fs.all_containers_root())? {
             let state = fs::read_to_string(
-                driver.persistence_file(&container?.file_name().to_string_lossy().to_string()),
+                self.fs.persistence_file(&container?.file_name().to_string_lossy().to_string()),
             )?;
             let state: container::PersistentState = serde_json::from_str(&state)?;
             // Check if pid is still alive
@@ -68,7 +74,7 @@ impl Engine {
         }
 
         for container in dead_containers {
-            let root = driver.container_root(container.name());
+            let root = self.fs.container_root(container.name());
             fs::remove_dir_all(root)?;
             warn!("Purged dead container {}", container.name());
         }
