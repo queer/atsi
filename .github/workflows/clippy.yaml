@@ -1,25 +1,25 @@
-name: Run clippy lints
+name: "Run clippy lints"
 on:
   push:
     branches:
-      - mistress
+      - "mistress"
   pull_request:
     branches:
-      - mistress
+      - "mistress"
 
 jobs:
   run-clippy:
     if: github.actor != 'dependabot'
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
-      - name: Install latest stable Rust
-        uses: actions-rs/toolchain@v1
+      - uses: "actions/checkout@v2"
+      - name: "Install latest stable Rust"
+        uses: "actions-rs/toolchain@v1"
         with:
-          toolchain: stable
+          toolchain: "stable"
           override: true
-      - uses: Swatinem/rust-cache@v1
+      - uses: "Swatinem/rust-cache@v1"
         with:
-          key: clippy
-      - name: Run clippy
-        run: cargo clippy
+          key: "clippy"
+      - name: "Run clippy"
+        run: "cargo clippy"

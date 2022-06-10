@@ -1,0 +1,32 @@
+name: "Build and upload release"
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build_release:
+    name: "build_release"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v2"
+      - name: "Install latest stable Rust"
+        uses: "actions-rs/toolchain@v1"
+        with:
+          toolchain: "stable"
+          override: true
+      - uses: "Swatinem/rust-cache@v1"
+        with:
+          key: "release"
+      - name: "Build release"
+        run: |
+          cargo install cargo-make
+          cargo make release
+      - name: "Create release"
+        uses: "softprops/action-gh-release@v1"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            target/release/@
