@@ -9,6 +9,10 @@ for Alpine.
 
 ## Getting started
 
+Static binaries are automatically released [here](https://github.com/queer/atsi/releases).
+
+### DIY
+
 Run [`cargo make debug`](https://github.com/sagiegurari/cargo-make) to create
 a debug build, or run `cargo make release` to create a release build. Builds
 are emitted to `target/{debug,release}/@`.
