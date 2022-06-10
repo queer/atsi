@@ -15,17 +15,6 @@ async fn main() -> SyncResult<()> {
     std::env::set_var("RUST_LOG", "info");
     pretty_env_logger::init();
 
-    // engine::alpine::download_rootfs(engine::alpine::VERSION).await?;
-    // debug!(
-    //     "cached alpine rootfs at: {}",
-    //     engine::alpine::rootfs_path(engine::alpine::VERSION).display()
-    // );
-    engine::slirp::download_slirp4netns().await?;
-    debug!(
-        "cached slirp4netns at: {}",
-        engine::slirp::bin_path().display()
-    );
-
     let matches = Command::new("@")
         .subcommand(
             Command::new("run")
@@ -133,6 +122,11 @@ async fn main() -> SyncResult<()> {
             });
             let alpine_version = matches.value_of("alpine").unwrap_or(engine::alpine::VERSION);
 
+            engine::slirp::download_slirp4netns().await?;
+            debug!(
+                "cached slirp4netns at: {}",
+                engine::slirp::bin_path().display()
+            );
             engine::alpine::download_rootfs(alpine_version).await?;
             debug!(
                 "cached requested alpine rootfs at: {}",

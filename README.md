@@ -1,9 +1,9 @@
 # @
 
-> instant alpine shells
+> instant rootless alpine shells
 
-@ (atsi, "at-sign") is a tool for instantly provisioning interactive Alpine
-containers. Think of it a little like
+@ (atsi, "at-sign") is a tool for instantly provisioning interactive rootless
+Alpine containers. Think of it a little like
 [`nix-shell`](https://nixos.org/manual/nix/stable/command-ref/nix-shell.html)
 for Alpine.
 
@@ -20,3 +20,12 @@ You may need to run `cargo install cargo-make` first.
 - `@ run`: Get an Alpine container running. Check `@ run --help` for all
            options.
 - `@ ps`: Show all currently-running Alpine containers.
+
+## How does it work?
+
+Docker is a lot of effort, and frankly is overkill for this. Instead, @ creates
+its own minimal containers, hooks up some basic networking, and extracts a
+fresh Alpine rootfs.
+
+[The process of setting up a container](https://github.com/queer/atsi/blob/105b2d44981a52318ac55941d64de14d36a80d31/src/engine/container.rs#L158-L232)
+should be fairly legible.
