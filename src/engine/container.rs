@@ -167,7 +167,7 @@ impl<'a> ContainerEngine<'a> {
         self.fs.touch_dir(rootfs)?;
         self.fs.touch_dir(upper)?;
         self.fs.touch_dir(workdir)?;
-        super::alpine::extract_rootfs_to_path(super::alpine::VERSION, rootfs_lower)?;
+        super::alpine::extract_rootfs_to_path(&self.opts.alpine_version, rootfs_lower)?;
         self.fs.bind_mount_rw(rootfs_lower, rootfs)?;
 
         // Mount basic devices

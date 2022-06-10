@@ -15,11 +15,11 @@ async fn main() -> SyncResult<()> {
     std::env::set_var("RUST_LOG", "info");
     pretty_env_logger::init();
 
-    engine::alpine::download_rootfs(engine::alpine::VERSION).await?;
-    debug!(
-        "cached alpine rootfs at: {}",
-        engine::alpine::rootfs_path(engine::alpine::VERSION).display()
-    );
+    // engine::alpine::download_rootfs(engine::alpine::VERSION).await?;
+    // debug!(
+    //     "cached alpine rootfs at: {}",
+    //     engine::alpine::rootfs_path(engine::alpine::VERSION).display()
+    // );
     engine::slirp::download_slirp4netns().await?;
     debug!(
         "cached slirp4netns at: {}",
@@ -85,7 +85,15 @@ async fn main() -> SyncResult<()> {
                         .takes_value(true)
                         .help("Mount a file/directory read-only. Format is source:target, ex. `/home/me/file:/file`.")
                         ,
-                ),
+                )
+                .arg(
+                    Arg::new("alpine")
+                        .long("alpine")
+                        .takes_value(true)
+                        .default_value(engine::alpine::VERSION)
+                        .help(format!("The version of Alpine Linux to use. Default is {}", engine::alpine::VERSION).as_str())
+                )
+                ,
         )
         .subcommand(Command::new("ps"))
         .get_matches();
@@ -123,6 +131,13 @@ async fn main() -> SyncResult<()> {
                 })
                 .collect()
             });
+            let alpine_version = matches.value_of("alpine").unwrap_or(engine::alpine::VERSION);
+
+            engine::alpine::download_rootfs(alpine_version).await?;
+            debug!(
+                "cached requested alpine rootfs at: {}",
+                engine::alpine::rootfs_path(alpine_version).display()
+            );
 
             engine::Engine::new(start)
                 .run(engine::RunOpts {
@@ -133,6 +148,7 @@ async fn main() -> SyncResult<()> {
                     immutable,
                     rw_mounts,
                     ro_mounts,
+                    alpine_version: alpine_version.to_string(),
                 })
                 .await?;
         }

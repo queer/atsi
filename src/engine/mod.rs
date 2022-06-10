@@ -18,6 +18,7 @@ pub struct RunOpts {
     pub immutable: bool,
     pub rw_mounts: Vec<(String, String)>,
     pub ro_mounts: Vec<(String, String)>,
+    pub alpine_version: String,
 }
 
 pub struct Engine {
