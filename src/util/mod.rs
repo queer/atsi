@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 pub type Result<T> = std::result::Result<T, Box<dyn Error>>;
 pub type SyncResult<T> = std::result::Result<T, Box<dyn Error + Send + Sync>>;
 
-pub const USER_AGENT: &str = "squish (https://github.com/queer/squish)";
+pub const USER_AGENT: &str = "@ (https://github.com/queer/atsi)";
 
 #[allow(dead_code)]
 #[derive(Debug)]
