@@ -25,6 +25,7 @@ pub struct PersistentState {
     detach: bool,
     pid: u32,
     slirp_pid: u32,
+    opts: super::RunOpts,
 }
 
 impl<'a> ContainerEngine<'a> {
@@ -145,6 +146,7 @@ impl<'a> ContainerEngine<'a> {
             detach: self.opts.detach,
             pid: std::process::id(),
             slirp_pid,
+            opts: self.opts.clone(),
         };
         let ser = serde_json::to_string(&state)?;
         let mut file = File::create(self.fs.persistence_file(self.name))?;

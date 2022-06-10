@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct RunOpts {
     pub command: String,
     pub packages: Vec<String>,
@@ -43,7 +44,9 @@ impl Engine {
         Ok(())
     }
 
-    pub async fn ps(&self) -> SyncResult<()> {
+    pub async fn ps(&self, json: bool) -> SyncResult<()> {
+        use prettytable::{cell, row, Table};
+
         let driver = fs_driver::FsDriver::new();
         let mut dead_containers = vec![];
         let mut live_containers = vec![];
@@ -70,8 +73,16 @@ impl Engine {
             warn!("Purged dead container {}", container.name());
         }
 
-        for container in live_containers {
-            info!("{}: {}", container.name(), container.pid());
+        if json {
+            println!("{}", serde_json::to_string(&live_containers)?);
+        } else {
+            let mut table = Table::new();
+            table.add_row(row!["NAME", "PID"]);
+            for container in live_containers {
+                // info!("{}: {}", container.name(), container.pid());
+                table.add_row(row![container.name(), container.pid()]);
+            }
+            table.printstd();
         }
 
         Ok(())

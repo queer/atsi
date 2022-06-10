@@ -93,7 +93,7 @@ async fn main() -> SyncResult<()> {
                 )
                 ,
         )
-        .subcommand(Command::new("ps"))
+        .subcommand(Command::new("ps").arg(Arg::new("json").long("json").help("Output as JSON")))
         .get_matches();
 
     match matches.subcommand_name() {
@@ -169,7 +169,10 @@ async fn main() -> SyncResult<()> {
                 .await?;
         }
         Some("ps") => {
-            engine::Engine::new(start).ps().await?;
+            let matches = matches.subcommand_matches("ps").unwrap();
+            let json = matches.is_present("json");
+
+            engine::Engine::new(start).ps(json).await?;
         }
         _ => {}
     }
