@@ -104,8 +104,7 @@ impl ContainerEngine {
             nix::sys::signal::kill(
                 nix::unistd::Pid::from_raw(slirp_id as i32),
                 nix::sys::signal::SIGTERM,
-            )
-            .unwrap();
+            );
         })?;
 
         // wait for exit
@@ -123,12 +122,18 @@ impl ContainerEngine {
             }
         }
 
-        debug!("Cleaning up!");
-        self.fs.cleanup_root(&self.opts.name)?;
-        nix::sys::signal::kill(
-            nix::unistd::Pid::from_raw(slirp_id as i32),
-            nix::sys::signal::SIGTERM,
-        )?;
+        #[allow(unused_must_use)]
+        {
+            // For similar reasons as the ^C handler, we don't care as much
+            // about whether these *actually* work, as it *should* work
+            // *enough* of the time.
+            debug!("Cleaning up!");
+            self.fs.cleanup_root(&self.opts.name);
+            nix::sys::signal::kill(
+                nix::unistd::Pid::from_raw(slirp_id as i32),
+                nix::sys::signal::SIGTERM,
+            );
+        }
 
         Ok(())
     }
