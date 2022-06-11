@@ -31,7 +31,7 @@ checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
 
 [[package]]
 name = "atsi"
-version = "0.0.6"
+version = "0.0.7"
 dependencies = [
  "clap",
  "ctrlc",
