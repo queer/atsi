@@ -20,8 +20,6 @@ pub struct ContainerEngine {
 #[derive(serde::Serialize, serde::Deserialize, derive_getters::Getters)]
 pub struct PersistentState {
     name: String,
-    command: String,
-    detach: bool,
     pid: u32,
     slirp_pid: u32,
     opts: super::RunOpts,
@@ -142,8 +140,6 @@ impl ContainerEngine {
         );
         let state = PersistentState {
             name: self.opts.name.clone(),
-            command: self.opts.command.clone(),
-            detach: self.opts.detach,
             pid: std::process::id(),
             slirp_pid,
             opts: self.opts.clone(),

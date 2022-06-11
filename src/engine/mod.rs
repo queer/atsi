@@ -83,6 +83,14 @@ impl Engine {
         for container in dead_containers {
             let root = self.fs.container_root(container.name());
             fs::remove_dir_all(root)?;
+            nix::sys::signal::kill(
+                nix::unistd::Pid::from_raw(*container.pid() as i32),
+                nix::sys::signal::SIGTERM,
+            )?;
+            nix::sys::signal::kill(
+                nix::unistd::Pid::from_raw(*container.slirp_pid() as i32),
+                nix::sys::signal::SIGTERM,
+            )?;
             warn!("Purged dead container {}", container.name());
         }
 
