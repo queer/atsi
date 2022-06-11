@@ -205,12 +205,7 @@ impl ContainerEngine {
         if !self.opts.packages.is_empty() {
             info!("installing {} package(s)...", self.opts.packages.len());
             info!("requested packages: {}", self.opts.packages.join(", "));
-            let _update_status = Command::new("/sbin/apk")
-                .env_clear()
-                .arg("update")
-                .spawn()?
-                .wait()?;
-            let mut install_args = vec!["add"];
+            let mut install_args = vec!["add", "-U"];
             for pkg in &self.opts.packages {
                 install_args.push(pkg);
             }
