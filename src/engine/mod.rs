@@ -90,10 +90,13 @@ impl Engine {
             println!("{}", serde_json::to_string(&live_containers)?);
         } else {
             let mut table = Table::new();
-            table.add_row(row!["NAME", "PID"]);
+            table.add_row(row!["NAME", "PID", "COMMAND"]);
             for container in live_containers {
-                // info!("{}: {}", container.name(), container.pid());
-                table.add_row(row![container.name(), container.pid()]);
+                table.add_row(row![
+                    container.name(),
+                    container.pid(),
+                    container.opts().command
+                ]);
             }
             table.printstd();
         }
