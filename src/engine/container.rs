@@ -166,6 +166,11 @@ impl ContainerEngine {
         debug!("Setting up root directory...");
         self.fs.touch_dir(rootfs_lower)?;
         self.fs.touch_dir(rootfs)?;
+        // Note: An overlay mount would be better. Since we've moved into a new
+        // mount namespace (CLONE_NEWNS), we should be able to do overlay
+        // mounts without issue. However, I just can't find the magic syscall
+        // combination that does an overlay mount right.
+        // If this could be figured out, @ would be a LOT faster.
         super::alpine::extract_rootfs_to_path(&self.opts.alpine_version, rootfs_lower)?;
         self.fs.bind_mount_rw(rootfs_lower, rootfs)?;
 
