@@ -91,7 +91,7 @@ impl Engine {
                 nix::unistd::Pid::from_raw(*container.slirp_pid() as i32),
                 nix::sys::signal::SIGTERM,
             )?;
-            warn!("Purged dead container {}", container.name());
+            warn!("purged dead container {}", container.name());
         }
 
         if json {

@@ -31,7 +31,7 @@ pub async fn download_rootfs(version: &str) -> SyncResult<()> {
     if Path::new(&rootfs_tarball(version)).exists() {
         return Ok(());
     }
-    info!("Downloading Alpine rootfs v{}...", version);
+    info!("downloading Alpine rootfs v{}...", version);
     let manifest_url = format!("{}/latest-releases.yaml", base_url(version, ARCH));
     let manifest_text = reqwest::Client::builder()
         .user_agent(USER_AGENT)

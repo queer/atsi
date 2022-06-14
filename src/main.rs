@@ -152,7 +152,7 @@ async fn main() -> SyncResult<()> {
                         if let Some((key, value)) = e.split_once('=') {
                             (key.to_string(), value.to_string())
                         } else {
-                            error!("Invalid environment variable: {}", e);
+                            error!("invalid environment variable: {}", e);
                             panic!();
                         }
                     })

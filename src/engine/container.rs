@@ -94,7 +94,7 @@ impl ContainerEngine {
         let name = self.opts.name.clone();
         #[allow(unused_must_use)]
         ctrlc::set_handler(move || {
-            debug!("Cleaning up after ^C");
+            debug!("cleaning up after ^C");
             // It's okay to ignore the result here because we don't actually
             // care. This is just a fail-safe on the off-chance that it doesn't
             // otherwise get cleaned up.
@@ -127,7 +127,7 @@ impl ContainerEngine {
             // For similar reasons as the ^C handler, we don't care as much
             // about whether these *actually* work, as it *should* work
             // *enough* of the time.
-            debug!("Cleaning up!");
+            debug!("cleaning up!");
             self.fs.cleanup_root(&self.opts.name);
             nix::sys::signal::kill(
                 nix::unistd::Pid::from_raw(slirp_id as i32),
@@ -140,7 +140,7 @@ impl ContainerEngine {
 
     fn persist(&self, slirp_pid: u32) -> SyncResult<()> {
         debug!(
-            "Persist state -> {}",
+            "persist state -> {}",
             self.fs.persistence_file(&self.opts.name).display()
         );
         let state = PersistentState {
@@ -163,7 +163,7 @@ impl ContainerEngine {
         let rootfs = &append_all(container_root, vec!["rootfs"]);
 
         // Set up root directory and bind-mount immutable alpine fs
-        debug!("Setting up root directory...");
+        debug!("setting up root directory...");
         self.fs.touch_dir(rootfs_lower)?;
         self.fs.touch_dir(rootfs)?;
         // Note: An overlay mount would be better. Since we've moved into a new
@@ -175,7 +175,7 @@ impl ContainerEngine {
         self.fs.bind_mount_rw(rootfs_lower, rootfs)?;
 
         // Mount basic devices
-        debug!("Bind-mounting devices...");
+        debug!("bind-mounting devices...");
         self.fs
             .bind_mount_dev("/dev/null", &append_all(rootfs, vec!["dev", "null"]))?;
         self.fs
@@ -186,7 +186,7 @@ impl ContainerEngine {
             .bind_mount_dev("/dev/urandom", &append_all(rootfs, vec!["dev", "urandom"]))?;
 
         // Make a fake /tmp and mount it rw
-        debug!("Mounting /tmp...");
+        debug!("mounting /tmp...");
         let tmpfs = &append_all(container_root, vec!["tmp"]);
         self.fs.touch_dir(tmpfs)?;
         self.fs
@@ -199,7 +199,7 @@ impl ContainerEngine {
         self.auto_mount(rootfs, &self.opts.ro_mounts, AutoMountMode::Ro)?;
 
         // chroot
-        debug!("Pivoting!");
+        debug!("pivoting!");
         debug!("pivotroot -> {}", rootfs.display());
         chroot(rootfs).expect("couldn't chroot!?");
         chdir("/app").expect("couldn't chdir to /app!?");
@@ -237,7 +237,7 @@ impl ContainerEngine {
             .arg("-c")
             .arg(&self.opts.command)
             .exec();
-        error!("Failed running container: {}", error);
+        error!("failed running container: {}", error);
 
         Ok(())
     }
