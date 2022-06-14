@@ -49,12 +49,13 @@ async fn main() -> SyncResult<()> {
                         .required(false)
                         .takes_value(false)
                         .help("Makes the container's rootfs immutable (read-only).")
+                        .action(clap::ArgAction::SetTrue)
                         ,
                 )
                 .arg(
                     Arg::new("package")
                         .short('P')
-                        .multiple_occurrences(true)
+                        .action(clap::ArgAction::Append)
                         .takes_value(true)
                         .help("Specify a package to install. Can be specified multiple times.")
                         ,
@@ -62,7 +63,7 @@ async fn main() -> SyncResult<()> {
                 .arg(
                     Arg::new("port")
                         .short('p')
-                        .multiple_occurrences(true)
+                        .action(clap::ArgAction::Append)
                         .takes_value(true)
                         .help("Expose a port to the host. Format is outer:inner, ex. `8080:8081`.")
                         ,
@@ -70,7 +71,7 @@ async fn main() -> SyncResult<()> {
                 .arg(
                     Arg::new("rw")
                         .long("rw")
-                        .multiple_occurrences(true)
+                        .action(clap::ArgAction::Append)
                         .takes_value(true)
                         .help("Mount a file/directory read-write. Format is source:target, ex. `/home/me/file:/file`.")
                         ,
@@ -78,7 +79,7 @@ async fn main() -> SyncResult<()> {
                 .arg(
                     Arg::new("ro")
                         .long("ro")
-                        .multiple_occurrences(true)
+                        .action(clap::ArgAction::Append)
                         .takes_value(true)
                         .help("Mount a file/directory read-only. Format is source:target, ex. `/home/me/file:/file`.")
                         ,
@@ -107,18 +108,18 @@ async fn main() -> SyncResult<()> {
                 )
                 ,
         )
-        .subcommand(Command::new("ps").arg(Arg::new("json").long("json").help("Output as JSON")))
+        .subcommand(Command::new("ps").arg(Arg::new("json").long("json").help("Output as JSON").takes_value(false).action(clap::ArgAction::SetTrue)))
         .get_matches();
 
     match matches.subcommand_name() {
         Some("run") => {
             let matches = matches.subcommand_matches("run").unwrap();
-            let command = matches.value_of("command").unwrap();
+            let command = matches.get_one::<String>("command").unwrap();
             let detach: bool = false; // matches.is_present("detach");
             let packages: Vec<String> = matches
-                .values_of("package")
+                .get_many::<String>("package")
                 .map_or(vec![], |v| v.map(|f| f.to_string()).collect());
-            let ports: Vec<(u16, u16)> = matches.values_of("port").map_or(vec![], |v| {
+            let ports: Vec<(u16, u16)> = matches.get_many::<String>("port").map_or(vec![], |v| {
                 v.map(|p| {
                     let slice: Vec<&str> = p.split(':').collect();
                     (
@@ -128,37 +129,42 @@ async fn main() -> SyncResult<()> {
                 })
                 .collect()
             });
-            let immutable: bool = matches.is_present("immutable");
-            let rw_mounts: Vec<(String, String)> = matches.values_of("rw").map_or(vec![], |v| {
-                v.map(|p| {
-                    let slice: Vec<String> = p.split(':').map(|s| s.to_string()).collect();
-                    (slice[0].clone(), slice[1].clone())
-                })
-                .collect()
-            });
-            let ro_mounts: Vec<(String, String)> = matches.values_of("ro").map_or(vec![], |v| {
-                v.map(|p| {
-                    let slice: Vec<String> = p.split(':').map(|s| s.to_string()).collect();
-                    (slice[0].clone(), slice[1].clone())
-                })
-                .collect()
-            });
-            let alpine_version = matches
-                .value_of("alpine")
-                .unwrap_or(engine::alpine::VERSION);
-            let env_vars: HashMap<String, String> =
-                matches.values_of("env").map_or(HashMap::new(), |v| {
-                    v.map(|e| {
-                        if let Some((key, value)) = e.split_once('=') {
-                            (key.to_string(), value.to_string())
-                        } else {
-                            error!("invalid environment variable: {}", e);
-                            panic!();
-                        }
+            let immutable = *matches.get_one::<bool>("immutable").unwrap_or(&false);
+            let rw_mounts: Vec<(String, String)> =
+                matches.get_many::<String>("rw").map_or(vec![], |v| {
+                    v.map(|p| {
+                        let slice: Vec<String> = p.split(':').map(|s| s.to_string()).collect();
+                        (slice[0].clone(), slice[1].clone())
                     })
                     .collect()
                 });
-            let name = matches.value_of("name").unwrap();
+            let ro_mounts: Vec<(String, String)> =
+                matches.get_many::<String>("ro").map_or(vec![], |v| {
+                    v.map(|p| {
+                        let slice: Vec<String> = p.split(':').map(|s| s.to_string()).collect();
+                        (slice[0].clone(), slice[1].clone())
+                    })
+                    .collect()
+                });
+            let alpine_version = matches
+                .get_one::<String>("alpine")
+                .cloned()
+                .unwrap_or_else(|| engine::alpine::VERSION.to_string());
+            let env_vars: HashMap<String, String> =
+                matches
+                    .get_many::<String>("env")
+                    .map_or(HashMap::new(), |v| {
+                        v.map(|e| {
+                            if let Some((key, value)) = e.split_once('=') {
+                                (key.to_string(), value.to_string())
+                            } else {
+                                error!("invalid environment variable: {}", e);
+                                panic!();
+                            }
+                        })
+                        .collect()
+                    });
+            let name = matches.get_one::<String>("name").unwrap();
 
             if engine.container_exists(name) {
                 error!("@ container already exists: {}", name);
@@ -170,10 +176,10 @@ async fn main() -> SyncResult<()> {
                 "cached slirp4netns at: {}",
                 engine::slirp::bin_path().display()
             );
-            engine::alpine::download_rootfs(alpine_version).await?;
+            engine::alpine::download_rootfs(&alpine_version).await?;
             debug!(
                 "cached requested alpine rootfs at: {}",
-                engine::alpine::rootfs_path(alpine_version).display()
+                engine::alpine::rootfs_path(&alpine_version).display()
             );
 
             engine
@@ -193,7 +199,7 @@ async fn main() -> SyncResult<()> {
         }
         Some("ps") => {
             let matches = matches.subcommand_matches("ps").unwrap();
-            let json = matches.is_present("json");
+            let json = *matches.get_one::<bool>("json").unwrap_or(&false);
 
             engine::Engine::new(start).ps(json).await?;
         }
