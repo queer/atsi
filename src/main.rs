@@ -108,7 +108,15 @@ async fn main() -> SyncResult<()> {
                 )
                 ,
         )
-        .subcommand(Command::new("ps").arg(Arg::new("json").long("json").help("Output as JSON").takes_value(false).action(clap::ArgAction::SetTrue)))
+        .subcommand(
+            Command::new("ps").arg(
+                Arg::new("json")
+                    .long("json")
+                    .help("Output as JSON")
+                    .takes_value(false)
+                    .action(clap::ArgAction::SetTrue)
+            )
+        )
         .get_matches();
 
     match matches.subcommand_name() {
