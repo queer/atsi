@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 clap = "3.2.17"
-ctrlc = "3.2.2"
+ctrlc = "3.2.3"
 derive-getters = "0.2.0"
 dirs = "4.0.0"
 flate2 = "1.0.23"
