@@ -17,7 +17,7 @@ pretty_env_logger = "0.4.0"
 prettytable-rs = "0.9.0"
 reqwest = "0.11.12"
 rlimit = "0.8.3"
-serde = { version = "1.0.146", features = ["derive"] }
+serde = { version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.87"
 tar = "0.4.38"
 tokio = { version = "1.21.2", features = [ "full" ] }
