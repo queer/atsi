@@ -4,7 +4,7 @@ version = "0.0.11"
 edition = "2021"
 
 [dependencies]
-clap = "3.2.22"
+clap = "4.1.1"
 ctrlc = "3.2.4"
 derive-getters = "0.2.0"
 dirs = "4.0.0"
